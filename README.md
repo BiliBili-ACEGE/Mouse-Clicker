@@ -1,4 +1,4 @@
-# python code
+# BY python code
 鼠标连点器
 如果报错，请安装运行库
 目前做到这，后面会更新的

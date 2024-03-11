@@ -2,8 +2,7 @@ import time
 import threading
 import pynput.mouse  
 from pynput.keyboard import Key, Listener
-from tkinter import *
-from tkinter import messagebox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QRadioButton, QLineEdit, QTextEdit, QPushButton, QMessageBox
 import ctypes
 import subprocess
 
@@ -16,34 +15,33 @@ def toggle_language():
     if language == "English":
         language = "Chinese"
         # 修改界面文本为中文
-        root.title('鼠标连点器[有快捷键版]')
-        label3.config(text='---------- 当前状态和说明 ----------')
-        lab1.config(text='鼠标按钮')
-        r1.config(text='左键')
-        r2.config(text='右键')
-        lab2.config(text='时间间隔')
-        btn_start.config(text='开始')
-        btn_toggle_language.config(text='切换语言') 
-        state.delete('0.0', END)
-        state.insert(INSERT, "当前状态:空闲\n")
-        state.insert(INSERT, "选择您要单击的鼠标按钮并设置时间间隔，然后单击 START 按钮开始等待")
-        messagebox.showinfo("切换语言", "已切换到中文界面")
+        window.setWindowTitle('鼠标连点器[有快捷键版]')
+        label3.setText('---------- 当前状态和说明 ----------')
+        lab1.setText('鼠标按钮')
+        r1.setText('左键')
+        r2.setText('右键')
+        lab2.setText('时间间隔')
+        btn_start.setText('开始')
+        btn_toggle_language.setText('切换语言') 
+        state.clear()
+        state.append("当前状态:空闲\n")
+        state.append("选择您要单击的鼠标按钮并设置时间间隔，然后单击 START 按钮开始等待")
+        QMessageBox.information(window, "切换语言", "已切换到中文界面")
     else:
         language = "English"
         # 修改界面文本为英文
-        root.title('Mouse Clicker [with Hotkeys]')
-        label3.config(text='---------- Current State and Instructions ----------')
-        lab1.config(text='Mouse Button')
-        r1.config(text='Left')
-        r2.config(text='Right')
-        lab2.config(text='Interval')
-        btn_start.config(text='Start')
-        btn_toggle_language.config(text='Toggle Language')  
-        state.delete('0.0', END)
-        state.insert(INSERT, "Current State: Idle\n")
-        state.insert(INSERT, "Choose the mouse button to click and set the interval, then click START button to begin.")
-        messagebox.showinfo("Toggle Language", "Switched to English Interface")
-
+        window.setWindowTitle('Mouse Clicker [with Hotkeys]')
+        label3.setText('---------- Current State and Instructions ----------')
+        lab1.setText('Mouse Button')
+        r1.setText('Left')
+        r2.setText('Right')
+        lab2.setText('Interval')
+        btn_start.setText('Start')
+        btn_toggle_language.setText('Toggle Language')  
+        state.clear()
+        state.append("Current State: Idle\n")
+        state.append("Choose the mouse button to click and set the interval, then click START button to begin.")
+        QMessageBox.information(window, "Toggle Language", "Switched to English Interface")
 
 # 鼠标连点控制类
 class MouseClick:
@@ -59,23 +57,22 @@ class MouseClick:
         if key == Key.f8:
             if self.running:
                 self.running = False
-                state.delete('0.0', END)
-                state.insert(INSERT, "当前状态:正在等待\n")
-                state.insert(INSERT, "请点击ESC键返回\n")
-                state.insert(INSERT, "请按F8键开始连点")
+                state.clear()
+                state.append("当前状态:正在等待\n")
+                state.append("请点击ESC键返回\n")
+                state.append("请按F8键开始连点")
                 self.mouse_click()
             else:
                 self.running = True
-                state.delete('0.0', END)
-                state.insert(INSERT, "当前状态:正在连点\n")
-                state.insert(INSERT, "请按F8键停止连点\n")
+                state.clear()
+                state.append("当前状态:正在连点\n")
+                state.append("请按F8键停止连点\n")
                 self.mouse_click()
         elif key == Key.esc:
-            btn_start['state'] = NORMAL
-            state.delete('0.0', END)
-            state.insert(INSERT, "当前状态:空闲\n")
-            state.insert(
-                INSERT, "选择您要点击的鼠标按钮并设置时间间隔，然后点击 START 按钮开始点击.")
+            btn_start.setEnabled(True)
+            state.clear()
+            state.append("当前状态:空闲\n")
+            state.append("选择您要点击的鼠标按钮并设置时间间隔，然后点击 START 按钮开始点击.")
             self.listener.stop()
 
     def mouse_click(self):
@@ -93,77 +90,75 @@ def new_thread_start(button, time):
 # START按键处理函数
 def start():
     try:
-        time = float(input.get())
+        time = float(input.text())
         if mouse.get() == LEFT:
             button = pynput.mouse.Button.left
         elif mouse.get() == RIGHT:
             button = pynput.mouse.Button.right
-        btn_start['state'] = DISABLED
-        state.delete('0.0', END)
-        state.insert(INSERT, "当前状态:正在等待\n")
-        state.insert(INSERT, "请按ESC键返回\n")
-        state.insert(INSERT, "请按F8键开始连点")
+        btn_start.setEnabled(False)
+        state.clear()
+        state.append("当前状态:正在等待\n")
+        state.append("请按ESC键返回\n")
+        state.append("请按F8键开始连点")
         t = threading.Thread(target=new_thread_start, args=(button, time))
         t.setDaemon(True)
         t.start()
     except:
-        state.delete('0.0', END)
-        state.insert(INSERT, "时间输入出错!\n")
-        state.insert(INSERT, "你应该输入整数或浮点数")
+        state.clear()
+        state.append("时间输入出错!\n")
+        state.append("你应该输入整数或浮点数")
 
-root = Tk()
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
-ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-root.tk.call('tk', 'scaling', ScaleFactor/75)
-root.iconbitmap("./d.ico")
+app = QApplication([])
+window = QMainWindow()
+window.setGeometry(100, 100, 800, 400)
+window.setFixedSize(800, 400)
 
 # 设置初始语言为英文
 language = "English"
-root.title('Mouse Clicker [with Hotkeys]')
-root.geometry('1920x1080')
+window.setWindowTitle('Mouse Clicker [with Hotkeys]')
 
-mouse = IntVar()
-lab1 = Label(root, text='Mouse Button', font=("微软雅黑", 11), fg="gray")
-lab1.place(relx=0.05, y=10, relwidth=0.4, height=30)
-r1 = Radiobutton(root,
-                 text='Left',
-                 font=("微软雅黑", 10),
-                 value=0,
-                 variable=mouse)
-r1.place(relx=0.05, y=40, relwidth=0.15, height=30)
-r2 = Radiobutton(root,
-                 text='Right',
-                 font=("微软雅黑", 10),
-                 value=1,
-                 variable=mouse)
-r2.place(relx=0.2, y=40, relwidth=0.3, height=30)
+mouse = LEFT
+lab1 = QLabel(window)
+lab1.setText('Mouse Button')
+lab1.move(20, 10)
+lab1.resize(100, 30)
+r1 = QRadioButton(window)
+r1.setText('Left')
+r1.setChecked(True)
+r1.move(20, 40)
+r2 = QRadioButton(window)
+r2.setText('Right')
+r2.move(120, 40)
 
-lab2 = Label(root, text='Interval', font=("微软雅黑", 11), fg="gray")
-lab2.place(relx=0.55, y=10, relwidth=0.4, height=30)
-input = Entry(root, relief="flat", font=("微软雅黑", 10))
-input.place(relx=0.55, y=40, relwidth=0.4, height=30)
+lab2 = QLabel(window)
+lab2.setText('Interval')
+lab2.move(420, 10)
+lab2.resize(100, 30)
+input = QLineEdit(window)
+input.move(420, 40)
+input.resize(300, 30)
 
-label3 = Label(root,
-               text='---------- Current State and Instructions ----------',
-               font=("微软雅黑", 8),
-               fg="gray")
-label3.place(relx=0.05, y=90, relwidth=0.9, height=20)
-state = Text(root, relief="flat", font=("微软雅黑", 10))
-state.place(relx=0.05, y=110, relwidth=0.9, height=120)
-state.insert(INSERT, "Current State: Idle\n")
-state.insert(INSERT, "Choose the mouse button to click and set the interval, then click START button to begin.")
+label3 = QLabel(window)
+label3.setText('---------- Current State and Instructions ----------')
+label3.move(20, 80)
+label3.resize(400, 20)
+state = QTextEdit(window)
+state.move(20, 100)
+state.resize(760, 120)
+state.append("Current State: Idle\n")
+state.append("Choose the mouse button to click and set the interval, then click START button to begin.")
 
-btn_start = Button(root,
-                   text='Start',
-                   font=("微软雅黑", 12),
-                   fg="white",
-                   bg="#207fdf",
-                   relief="flat",
-                   command=start)
-btn_start.place(relx=0.3, y=240, relwidth=0.4, height=30)
+btn_start = QPushButton(window)
+btn_start.setText('Start')
+btn_start.move(300, 240)
+btn_start.resize(200, 30)
+btn_start.clicked.connect(start)
 
-btn_toggle_language = Button(root, text='Toggle Language', font=("微软雅黑", 12), fg="white", bg="#207fdf", relief="flat", command=toggle_language)
-btn_toggle_language.place(relx=0.3, y=280, relwidth=0.4, height=30)
+btn_toggle_language = QPushButton(window)
+btn_toggle_language.setText('Toggle Language')
+btn_toggle_language.move(300, 280)
+btn_toggle_language.resize(200, 30)
+btn_toggle_language.clicked.connect(toggle_language)
 
-
-root.mainloop()
+window.show()
+app.exec_()
